@@ -58,7 +58,7 @@ def read_number_of_patterns_from_input():
     """
     This method reads number of patterns from the input, if input is not int it will raise ValueError exception
     """
-    number_of_patterns = raw_input("Please enter number of patterns:\n")
+    number_of_patterns = raw_input()
     return int(number_of_patterns)
 
 
@@ -70,7 +70,7 @@ def read_patterns_from_input(number_of_patterns):
     patterns = []
     for i in range(number_of_patterns):
         pattern = sys.stdin.readline()
-        #@TODO: validate the pattern
+        # cleanup the strings
         patterns.append(pattern.rstrip("\n").lstrip(",").rstrip(","))
     return patterns
 
@@ -79,7 +79,7 @@ def read_number_of_paths_from_input():
     """
     This method reads the number of paths from input, if the input is not a valid int it will raise ValueError
     """
-    number_of_paths = raw_input("Please enter number of paths:\n")
+    number_of_paths = raw_input()
     return int(number_of_paths)
 
 
@@ -94,7 +94,7 @@ def read_paths_from_input(number_of_paths):
         if path is None:
             raise InputException
 
-        #@TODO: validate the path
+        # cleanup the strings
         paths.append(path.rstrip("\n").lstrip("/").rstrip("/"))
     return paths
 

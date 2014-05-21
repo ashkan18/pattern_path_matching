@@ -19,5 +19,6 @@ class PatternModel(object):
         @return: list of locations of wildcards in this pattern
         """
         pattern_sections = self.pattern.split(",")
+        # go through the pattern sections and find "*"
         return [i for i, section in enumerate(pattern_sections) if section == "*"]
 
