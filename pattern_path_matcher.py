@@ -23,30 +23,48 @@ class PatternPathMatcher(object):
         @return: a list of matches, if we had a successful match we add PatternModel of the match otherwise we add None
         """
         final_matches = []
-        for path in self.paths:
-            path_sections = path.split("/")
+        for path in self.paths:  # for each path in all of the input paths
+            path_sections = path.split("/")  # split the path with / to get sections
+
+            # we need number of sections to check which bucket in the hash we have to check
             number_of_sections = len(path_sections)
 
             # check if we have patterns with this number of sections
             if number_of_sections not in self.pattern_items_count_hash:
+                # there was no pattern with same number of sections, we don't have a match
                 final_matches.append(None)
                 continue
             else:
+                # we have patterns with same number of sections
+                # set the current best matches and current max of wildcard position sum
                 best_match = None
                 current_wildcard_position_sum = None
+
                 # get the list of patterns with this number of sections
                 for wild_card_count, patterns in self.pattern_items_count_hash[number_of_sections].items():
+                    # we check for the matches by going through the key value of second hash, the key is
+                    # number of wildcards and value is list of pattern models
+                    # since key's are ordered by number of wildcards asc, if we find the match in this bucket we don't
+                    # have to check next buckets otherwise we need to check the next bucket (bucket with more wildcards)
                     for pattern in patterns:
+                        # check if there is a match
                         matched = self.match(path=path, pattern_model=pattern)
+                        # if there is a match and the sum of wildcard positions of this pattern
+                        # is the max so far this would be the "best match" so far, update the best match and max sum
                         if matched and (current_wildcard_position_sum is None
                                         or pattern.wildcard_locations_sum > current_wildcard_position_sum):
                             best_match = pattern
                             current_wildcard_position_sum = pattern.wildcard_locations_sum
                     if best_match is not None:
+                        # if we found a best match in this bucket, as said before,
+                        # we don't have to check next bucket (bucket with more wildcards)
                         break
+
                 if best_match is not None:
+                    # if we have found a match, add this match to final results
                     final_matches.append(best_match)
                 else:
+                    # we haven't found a match, add None
                     final_matches.append(None)
         return final_matches
 
@@ -58,13 +76,19 @@ class PatternPathMatcher(object):
         @param pattern_model: String containing the pattern we are trying to match with path
         @return: boolean showing if it was a match or not
         """
+        # get each section of the path
         path_sections = path.split("/")
+        # get each section of the patterns
         pattern_sections = pattern_model.pattern.split(",")
 
         for i, path_section in enumerate(path_sections):
+            # for each path sections
             if i not in pattern_model.wildcard_locations:
+                # we don't have to check the wildcard positions of the matching, we just ignore matching wildcards
                 if path_section != pattern_sections[i]:
+                    # if this section of path does not match same section of pattern we don't match
                     return False
+        # getting here means we have matched
         return True
 
     def __sort_patterns_by_importance(self, patterns):
@@ -102,6 +126,9 @@ class PatternPathMatcher(object):
                 }
 
             }
+
+        Note: for simplicity in above structure I'm showint patterns and not pattern models in the final hash. In real
+        scenario we add pattern models
         @param patterns: list of patterns we got from the user.
         """
 
@@ -109,10 +136,14 @@ class PatternPathMatcher(object):
         # pattern and number of wildcards
         pattern_match_count_hash = {}
         for pattern in patterns:
+            # split the sections of the pattern by ,
             matches = pattern.split(',')
+            # get the number of wildcards in this pattern, based on that it goes to specific bucket in hash
             number_of_wildcard = matches.count('*')
+            # number of matches means number of sections in the pattern a,b,c has 3 and foo,bar has 2 sections(matches)
             number_of_matches = len(matches)
 
+            # create a new pattern model using this pattern
             pattern_model = PatternModel(pattern)
 
             if number_of_matches not in pattern_match_count_hash:
